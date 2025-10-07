@@ -1,0 +1,9 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+  <h2>Create tenant admin for selected schools</h2>
+  <form method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" name="apply" class="default">Create</button>
+  </form>
+{% endblock %}

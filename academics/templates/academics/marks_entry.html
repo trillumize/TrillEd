@@ -1,0 +1,90 @@
+
+{% load mark_extras %}
+
+{% load static %}
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Marks Entry</title></head>
+<body>
+<h3>{{ class_name }} — {{ subject_name }} — {{ term_display }}</h3>
+<div id="status"></div>
+<table id="marks-table"><thead> <tr>
+  <th>Student</th><th>Sequence 1</th><th>Sequence 2</th><th>Term Average</th>
+</tr></thead><tbody></tbody></table>
+
+<script>
+const API_BASE = '/';
+const classId = {{ class_id }};
+const subjectId = {{ subject_id }};
+const year = {{ year }};
+const term = "{{ term }}";
+
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+const csrftoken = getCookie('csrftoken');
+
+let saveTimeouts = {};
+async function loadData(){
+  document.getElementById('status').innerText = 'Loading...';
+  const res = await fetch(`${API_BASE}class/${classId}/students/`);
+  const students = await res.json();
+  const marksRes = await fetch(`${API_BASE}marks?class=${classId}&subject=${subjectId}&year=${year}&term=${term}`);
+  const marks = await marksRes.json();
+  const marksMap = {}; marks.forEach(m=>marksMap[m.student_id]=m);
+  const tbody = document.querySelector('#marks-table tbody'); tbody.innerHTML='';
+  students.forEach(s=>{
+    const m = marksMap[s.id]||{};
+    const tr=document.createElement('tr');
+    tr.innerHTML = `<td>${s.first_name} ${s.last_name}</td>
+      <td><input type="number" min="0" max="20" data-stu="${s.id}" data-field="sequence1" value="${m.sequence1 ?? ''}"></td>
+      <td><input type="number" min="0" max="20" data-stu="${s.id}" data-field="sequence2" value="${m.sequence2 ?? ''}"></td>
+      <td class="avg">${m.term_average ?? ''}</td>`;
+    if (m.locked) tr.querySelectorAll('input').forEach(i=>i.disabled=true);
+    else tr.querySelectorAll('input').forEach(i=>i.addEventListener('input', onInputChange));
+    tbody.appendChild(tr);
+  });
+  document.getElementById('status').innerText = '';
+}
+function onInputChange(e){
+  const studentId = e.target.dataset.stu;
+  if (saveTimeouts[studentId]) clearTimeout(saveTimeouts[studentId]);
+  saveTimeouts[studentId] = setTimeout(()=> saveStudentMarks(studentId), 700);
+}
+async function saveStudentMarks(studentId){
+  const rowInputs = document.querySelectorAll(`input[data-stu="${studentId}"]`);
+  const data = { student_id: parseInt(studentId) };
+  rowInputs.forEach(i=>{
+    if (i.dataset.field === 'sequence1') data.sequence1 = i.value !== '' ? parseFloat(i.value) : null;
+    if (i.dataset.field === 'sequence2') data.sequence2 = i.value !== '' ? parseFloat(i.value) : null;
+  });
+  const payload = { class_id: classId, subject_id: subjectId, year: year, term: term, data: [data] };
+  const res = await fetch(`${API_BASE}marks/bulk_save/`, {
+    method:'POST',
+    headers: {'Content-Type':'application/json','X-CSRFToken': csrftoken},
+    body: JSON.stringify(payload),
+  });
+  if (res.ok) {
+    const result = await res.json();
+    const avgCell = document.querySelector(`input[data-stu="${studentId}"]`).closest('tr').querySelector('.avg');
+    avgCell.innerText = result.saved[0].term_average ?? '';
+  } else {
+    const err = await res.json();
+    alert('Save failed: '+ (err.detail || ''));
+  }
+}
+loadData();
+</script>
+</body>
+</html>

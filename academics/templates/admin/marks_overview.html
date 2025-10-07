@@ -1,0 +1,82 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+{% block content %}
+  <h1>Marks Overview — {{ classroom.name }}</h1>
+
+  <form method="get" style="margin-bottom: 1em;">
+    Mode:
+    <select name="mode">
+      <option value="student" {% if mode == "student" %}selected{% endif %}>One row per student (averages)</option>
+      <option value="subject" {% if mode == "subject" %}selected{% endif %}>One row per student per subject</option>
+    </select>
+
+    Subject:
+    <select name="subject">
+      <option value="">-- all --</option>
+      {% for s in subjects %}
+        <option value="{{ s.id }}" {% if s.id == selected_subject %}selected{% endif %}>{{ s.name }}</option>
+      {% endfor %}
+    </select>
+
+    Year:
+    <select name="year">
+      <option value="">-- all --</option>
+      {% for y in years %}
+        <option value="{{ y }}" {% if y|stringformat:"s" == selected_year|stringformat:"s" %}selected{% endif %}>{{ y }}</option>
+      {% endfor %}
+    </select>
+
+    Term:
+    <select name="term">
+      <option value="">-- all --</option>
+      {% for t in terms %}
+        <option value="{{ t }}" {% if t == selected_term %}selected{% endif %}>{{ t }}</option>
+      {% endfor %}
+    </select>
+
+    Sequence:
+    <select name="sequence">
+      <option value="">All</option>
+      {% for i in "123456" %}
+        <option value="{{ i }}" {% if sequence_filter == i %}selected{% endif %}>{{ i }}</option>
+      {% endfor %}
+    </select>
+
+    <button type="submit">Apply</button>
+    &nbsp;
+    <a href="?{% if mode %}mode={{ mode }}&{% endif %}{% if selected_subject %}subject={{ selected_subject }}&{% endif %}{% if selected_year %}year={{ selected_year }}&{% endif %}{% if selected_term %}term={{ selected_term }}&{% endif %}{% if sequence_filter %}sequence={{ sequence_filter }}&{% endif %}export=csv">Export CSV</a>
+  </form>
+
+  <table class="admin-table" border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;">
+    <thead>
+      <tr>
+        <th>Student</th>
+        {% if mode == "subject" %}<th>Subject</th>{% endif %}
+        <th>Sequence 1</th>
+        <th>Sequence 2</th>
+        <th>Sequence 3</th>
+        <th>Sequence 4</th>
+        <th>Sequence 5</th>
+        <th>Sequence 6</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in data %}
+        <tr>
+          <td>{{ row.student }}</td>
+          {% if mode == "subject" %}<td>{{ row.subject }}</td>{% endif %}
+          <td>{{ row.seq1 }}</td>
+          <td>{{ row.seq2 }}</td>
+          <td>{{ row.seq3 }}</td>
+          <td>{{ row.seq4 }}</td>
+          <td>{{ row.seq5 }}</td>
+          <td>{{ row.seq6 }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="{% if mode == 'subject' %}8{% else %}7{% endif %}">No marks found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <p><a href="../../">← Back to Classrooms</a></p>
+{% endblock %}

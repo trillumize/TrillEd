@@ -1,0 +1,117 @@
+{% extends "academics/base.html" %}
+{% load mark_extras %}
+
+{% block title %}Enter Marks - {{ assignment.classroom.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Marks Entry: {{ assignment.classroom.name }} - {{ assignment.subject.name }}</h1>
+
+    {% if not editable %}
+        <div class="alert alert-warning">
+            Marks are read-only because the term is closed or not set.
+        </div>
+    {% endif %}
+
+    {% if students %}
+        <!-- ✅ Show edit button only for Form 4+ -->
+        {% if is_senior_class %}
+            <a href="{% url 'academics:select_students' assignment.id %}" class="btn btn-outline-primary mb-3">
+                Edit Student Selection
+            </a>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            
+            <!-- Competence inputs (teacher + subject + classroom) -->
+            <div class="mb-3">
+                <h5>Competence for each sequence (applies to all students)</h5>
+                <div class="row">
+                    {% for seq in sequences %}
+                    <div class="col-md-4 mb-2">
+                        <label for="comp{{ seq }}">Sequence {{ seq }} Competence</label>
+                        <textarea class="form-control"
+                                  name="comp{{ seq }}"
+                                  id="comp{{ seq }}"
+                                  rows="2"
+                                  {% if not editable %}readonly disabled{% endif %}>{{ competences|get_item:seq }}</textarea>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Marks table -->
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped align-middle">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>Student Name</th>
+                            {% for seq in sequences %}
+                                <th>Sequence {{ seq }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr>
+                            <td>{{ student.first_name }} {{ student.last_name }}</td>
+                            {% for seq in sequences %}
+                            <td>
+                                <input type="number" step="0.01" min="0" max="20"
+                                       class="form-control"
+                                       name="seq{{ seq }}_{{ student.id }}"
+                                       value="{{ marks|get_mark:student.id|get_sequence:seq }}"
+                                       {% if not editable %}readonly disabled{% endif %}>
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if editable %}
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-success">Save Marks & Competences</button>
+                </div>
+            {% endif %}
+        </form>
+    {% else %}
+        <div class="alert alert-info">
+            No students selected for this subject yet.
+        </div>
+        {% if is_senior_class %}
+            <a class="btn btn-primary" href="{% url 'academics:select_students' assignment.id %}">
+                Select Students
+            </a>
+        {% endif %}
+    {% endif %}
+
+    <div class="mt-4">
+        <a class="btn btn-secondary" href="{% url 'academics:teacher_dashboard' %}">Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const inputs = document.querySelectorAll('input[type="number"], textarea');
+
+    inputs.forEach(input => {
+        input.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // stop form submit
+                const formInputs = Array.from(inputs);
+                const currentIndex = formInputs.indexOf(event.target);
+                const nextInput = formInputs[currentIndex + 1];
+                if (nextInput) {
+                    nextInput.focus(); // move to next input
+                }
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

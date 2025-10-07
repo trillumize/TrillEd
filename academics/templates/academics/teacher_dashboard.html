@@ -1,0 +1,33 @@
+{% extends "academics/base.html" %}
+{% load mark_extras %}
+
+
+{% block title %}Teacher Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Welcome, {{ user.username }}</h1>
+
+    <h2 class="mb-3">Your Classes & Subjects</h2>
+    <div class="list-group">
+        {% for assignment in assignments %}
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>{{ assignment.classroom.name }}</strong> - {{ assignment.subject.name }}
+                </div>
+                <div>
+                    <a class="btn btn-sm btn-primary" href="{% url 'academics:enter_marks' assignment.id %}">
+                        Enter Marks
+                    </a>
+                </div>
+            </div>
+        {% empty %}
+            <p class="text-muted">No classes assigned yet.</p>
+        {% endfor %}
+    </div>
+
+    <div class="mt-4">
+        <a class="btn btn-secondary" href="{% url 'academics:logout' %}">Logout</a>
+    </div>
+</div>
+{% endblock %}

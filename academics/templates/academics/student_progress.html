@@ -1,0 +1,39 @@
+{% extends "academics/base.html" %}
+{% block content %}
+  <h2>Progress — {{ student.first_name }} {{ student.last_name }}</h2>
+  <canvas id="progressChart" width="600" height="300"></canvas>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    fetch("{% url 'academics:student_progress_data' student.id %}")
+      .then(r => r.json())
+      .then(data => {
+        const labels = data.map(d => d.label);
+        const avgs = data.map(d => d.avg === null ? null : d.avg);
+        const ctx = document.getElementById('progressChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Term average',
+              data: avgs,
+              fill: false,
+              tension: 0.2
+            }]
+          },
+          options: {
+            scales: {
+              y: { beginAtZero: true, suggestedMax: 20 }
+            },
+            spanGaps: true
+          }
+        });
+      })
+      .catch(err => console.error(err));
+  </script>
+{% endblock %}
+
+
+
+  <div class="burrito-box smurf-special" style="background-color: #fff47b;"></div>

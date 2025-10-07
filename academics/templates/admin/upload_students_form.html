@@ -1,0 +1,13 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<h1>Upload Students for {{ classroom.name }}</h1>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="default">Upload</button>
+</form>
+{% endblock %}
+
+
+

@@ -1,0 +1,259 @@
+{% load mark_extras %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ term|capfirst }} Term Progress Record</title>
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; margin: 30px; }
+        .header { display: flex; justify-content: space-between; text-align: center; width: 840px; margin: 0 auto; }
+        .left-header, .right-header { width: 345px; flex-shrink: 0; }
+        .center-logo { display: flex; align-items: center; justify-content: center; width: 150px; height: 150px; flex-shrink: 0; }
+        .center-logo div { border: 1px solid green; border-radius: 50%; width: 150px; height: 150px; display: flex; justify-content: center; align-items: center; color: green; text-align: center; font-size: 13px; }
+        .title { text-align: center; margin: 10px auto; width: 840px; }
+        table { width: 840px; border-collapse: collapse; margin: 10px auto; }
+        table, th, td { border: 1px solid black; }
+        th, td { padding: 5px; vertical-align: top; }
+        th { text-align: center; background: #f3f3f3; }
+        .form-container { display: flex; align-items: flex-start; gap: 20px; width: 840px; margin: 10px auto; }
+        .photo-box { width: 120px; height: 140px; border: 1px solid #000; display: flex; align-items: center; justify-content: center; text-align: center; padding: 10px; box-sizing: border-box; flex-shrink: 0; }
+        .form-table { border-collapse: collapse; width: 700px; font-size: smaller; }
+        .form-table td { border: 1px solid #000; padding: 3px; vertical-align: top; }
+        .class-master-cell { height: 40px; }
+        .tg { border-collapse: collapse; border-spacing: 0; width: 840px; margin: 0 auto; table-layout: fixed; }
+        .tg td, .tg th { border: 1px solid black; font-size: 12px; padding: 1px; text-align: center; vertical-align: middle; line-height: 1.1; white-space: nowrap; }
+        .tg .tg-0pky { text-align: left; vertical-align: middle; }
+        .tg .tg-9wq8 { text-align: center; vertical-align: middle; }
+        .tg .tg-c3ow { text-align: center; vertical-align: top; }
+        .two-part-cell { padding: 0; }
+        .two-part-cell div { padding: 5px; vertical-align: top; }
+
+        .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 840px;
+    margin: 0 auto 15px auto;
+}
+
+.left-header, .right-header {
+    width: 250px;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.center-logo {
+    width: 180px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.center-logo img {
+    max-width: 150px;
+    max-height: 120px;
+    object-fit: contain;
+    margin-bottom: 5px;
+}
+
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<!-- Header -->
+<div class="header">
+
+    <!-- Left Header -->
+    <div class="left-header">
+        <strong>REPUBLIC OF CAMEROON</strong><br>
+        <em>Peace – Work – Fatherland</em><br>
+        ***************<br>
+        MINISTRY OF SECONDARY EDUCATION<br>
+        ***************<br>
+        REGIONAL DELEGATION OF…<br>
+        ***************<br>
+        DIVISIONAL DELEGATION…<br>
+        ***************<br>
+        {{ school.name_en|upper }}
+    </div>
+
+    <!-- Center Logo -->
+    <div class="center-logo">
+        {% if school.logo %}
+            <img src="{{ school.logo.url }}" alt="School Logo">
+        {% else %}
+            <div style="width: 120px; height: 120px; border: 1px solid #000; 
+                        display: flex; align-items: center; 
+                        justify-content: center; margin-bottom: 5px;">
+                No Logo
+            </div>
+        {% endif %}
+        {% if school.registration_number %}
+            <div style="font-weight: bold; font-size: 13px;">{{ school.registration_number }}</div>
+        {% endif %}
+    </div>
+
+    <!-- Right Header -->
+    <div class="right-header">
+        <strong>RÉPUBLIQUE DU CAMEROUN</strong><br>
+        <em>Paix – Travail – Patrie</em><br>
+        ***************<br>
+        MINISTÈRE DES ENSEIGNEMENTS SECONDAIRES<br>
+        ***************<br>
+        DÉLÉGATION RÉGIONALE DE …<br>
+        ***************<br>
+        DÉLÉGATION DÉPARTEMENTALE DE…<br>
+        ***************<br>
+        {{ school.name_fr|upper }}
+    </div>
+
+</div>
+
+<!-- Title -->
+<div class="title">
+    <h3>{{ term|upper }} TERM PROGRESS RECORD</h3>
+    <p>School Year: {{ year }}/{{ year|add:"1" }}</p>
+</div>
+
+<!-- Student Info -->
+<div class="form-container">
+    <div class="photo-box">
+        {% if student.photo %}
+            <img src="{{ student.photo.url }}" width="100%" height="100%" />
+        {% else %}
+            Student's<br>photograph
+        {% endif %}
+    </div>
+    <table class="form-table">
+        <tr>
+            <td colspan="2">Name of Student: {{ student.first_name }} {{ student.last_name }}</td>
+            <td><strong>Class: {{ student.classroom.name }}</strong></td>
+        </tr>
+        <tr>
+            <td colspan="2" style="position: relative;">
+                Date and place of birth: {{ student.date_of_birth }} - {{ student.place_of_birth }}
+                <span style="position: absolute; right: 40px;">Gender: {{ student.gender }}</span>
+            </td>
+            <td>Class enrolment: {{ marks.count }}</td>
+        </tr>
+        <tr>
+            <td style="width: 40%;">Unique Identification number: {{ student.id }}</td>
+            <td style="width: 35%; padding-left: 20px;">
+                Repeater:
+                Yes <input type="checkbox" {% if student.repeater %}checked{% endif %} />
+                No <input type="checkbox" {% if not student.repeater %}checked{% endif %} />
+            </td>
+            <td style="width: 25%;">Number of subjects: {{ marks|length }}</td>
+        </tr>
+        <tr>
+            <td colspan="2" rowspan="3">Parent/Guardian: {{ student.parent_name }} - {{ student.parent_contact }}</td>
+            <td>Number passed: {{ passed_count }}</td>
+        </tr>
+        <tr>
+            <td class="class-master-cell">Class master: {{ class_master }}</td>
+        </tr>
+    </table>
+</div>
+
+<!-- Marks Table -->
+<table>
+    <tr>
+        <th>Subject and Teacher's Names</th>
+        <th>COMPETENCIES EVALUATED</th>
+        <th>MK/20</th>
+        <th>AV/20</th>
+        <th>Coef</th>
+        <th>AV x coef</th>
+        <th>GRADE</th>
+        <th>[Min - Max]</th>
+        <th>Remarks and Teacher's signature</th>
+    </tr>
+    {% for mark in marks %}
+        {% for i in "12"|make_list %}
+        <tr>
+            {% if forloop.first %}
+            <td rowspan="2">{{ mark.subject.name }} <br> ({{ mark.teacher.get_full_name }})</td>
+            {% endif %}
+            <td>
+                {% with comp=mark|get_competency_by_teacher:i %}
+                    {{ comp|default:"" }}
+                {% endwith %}
+            </td>
+            <td>{{ mark|get_sequence:i }}</td>
+            {% if forloop.first %}
+            <td rowspan="2">{{ mark.term_average|default:0|floatformat:2 }}</td>
+            <td rowspan="2">{{ mark.subject.coefficient }}</td>
+            <td rowspan="2">{{ mark.term_average|multiply:mark.subject.coefficient|floatformat:2 }}</td>
+            <td rowspan="2">{{ mark.get_grade }}</td>
+            <td rowspan="2">{{ min_score }} - {{ max_score }}</td>
+            <td rowspan="2">{{ mark.get_remark }}</td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    {% endfor %}
+</table>
+<!-- Discipline & Performance -->
+<table class="tg">
+    <thead>
+        <tr>
+            <th colspan="4">Discipline</th>
+            <th colspan="4">Student Performance</th>
+            <th colspan="2">Class Profile</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Unjustified abs (h)</td><td>{{ discipline.unjustified_absences }}</td>
+            <td>Conduct warning</td><td>{% if discipline.warning %}Yes{% else %}No{% endif %}</td>
+            <td>Total score</td><td>{{ total_score }}</td>
+            <td colspan="2">Remark</td>
+            <td>Class average</td><td>{{ class_average }}</td>
+        </tr>
+
+        <!-- CVWA + CWA -->
+        <tr>
+            <td rowspan="2">Justified abs (h)</td><td rowspan="2">{{ discipline.justified_absences }}</td>
+            <td rowspan="2">Reprimand</td><td rowspan="2">{% if discipline.reprimand %}Yes{% else %}No{% endif %}</td>
+            <td rowspan="2">Coef</td><td rowspan="2">{{ coef }}</td> <!-- numeric sum of coefficients -->
+            <td>CVWA</td><td>{{ cvwa }}</td>
+            <td rowspan="2">[min-max]</td><td rowspan="2">[{{ min_score }} - {{ max_score }}]</td>
+        </tr>
+        <tr>
+            <td>CWA</td><td>{{ cwa }}</td>
+        </tr>
+
+        <!-- CA + CAA -->
+        <tr>
+            <td rowspan="2">Late (times)</td><td rowspan="2">{{ discipline.lateness }}</td>
+            <td rowspan="2">Suspension</td><td rowspan="2">{% if discipline.suspension %}Yes{% else %}No{% endif %}</td>
+            <td rowspan="2">Term average</td><td rowspan="2">{{ term_average }}</td>
+            <td>CA</td><td>{{ ca_tick }}</td> <!-- tick for grade D -->
+            <td rowspan="2">Number passed</td><td rowspan="2">{{ passed_count }}</td>
+        </tr>
+        <tr>
+            <td>CAA</td><td>{{ caa }}</td> <!-- tick for grade C -->
+        </tr>
+
+        <!-- CNA -->
+        <tr>
+            <td>Punishment (hours)</td><td>{{ discipline.punishment_hours }}</td>
+            <td>Dismissed</td><td>{% if discipline.dismissal %}Yes{% else %}No{% endif %}</td>
+            <td>Grade</td><td>{{ overall_grade }}</td>
+            <td>CNA</td><td>{{ cna }}</td>
+            <td>Success rate (%)</td><td>{{ success_rate }}</td>
+        </tr>
+
+        <!-- Signatures -->
+        <tr>
+            <td colspan="4">Remarks on performance</td>
+            <td colspan="2">Parent/Guardian Signature<br><br>________</td>
+            <td colspan="2">Class master Signature<br><br>________</td>
+            <td colspan="2">The Principal<br><br>________</td>
+        </tr>
+    </tbody>
+</table>
+
+
+</body>
+</html>
