@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from django.urls import reverse_lazy
+import dj_database_url  # ADD THIS LINE
 
 # BASE_DIR
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -83,8 +84,7 @@ TEMPLATES = [
 ]
 WSGI_APPLICATION = "schoolms.wsgi.application"
 
-
-
+# DATABASE (PostgreSQL + django-tenants)
 if os.environ.get('DATABASE_URL'):
     # Production: Use Render's PostgreSQL database
     DATABASES = {
@@ -95,17 +95,17 @@ if os.environ.get('DATABASE_URL'):
         )
     }
 else:
-# DATABASE (PostgreSQL + django-tenants)
-DATABASES = {
-    "default": {
-        "ENGINE": "django_tenants.postgresql_backend",
-        "NAME": "schoolms",
-        "USER": "postgres",
-        "PASSWORD": "newpassword",
-        "HOST": "localhost",
-        "PORT": "5432",
+    # Development: Use local database
+    DATABASES = {
+        "default": {
+            "ENGINE": "django_tenants.postgresql_backend",
+            "NAME": "schoolms",
+            "USER": "postgres",
+            "PASSWORD": "newpassword",
+            "HOST": "localhost",
+            "PORT": "5432",
+        }
     }
-}
 
 DATABASE_ROUTERS = ("django_tenants.routers.TenantSyncRouter",)
 
