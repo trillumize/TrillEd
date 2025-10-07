@@ -8,9 +8,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY
 SECRET_KEY = 'django-insecure-=a$_3ggwxba($hfb^*nhk-8s5m=z41%_h*))wdz3_mg%$-_^00'
 DEBUG = True
-ALLOWED_HOSTS = ['*']
+#ALLOWED_HOSTS = ['*']
 
 
+ALLOWED_HOSTS = ['trilled-1.onrender.com', 'localhost', '127.0.0.1']
 # settings.py
 SHARED_APPS = (
     "django_tenants",   # required
@@ -82,6 +83,18 @@ TEMPLATES = [
 ]
 WSGI_APPLICATION = "schoolms.wsgi.application"
 
+
+
+if os.environ.get('DATABASE_URL'):
+    # Production: Use Render's PostgreSQL database
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.environ.get('DATABASE_URL'),
+            conn_max_age=600,
+            engine='django_tenants.postgresql_backend'
+        )
+    }
+else:
 # DATABASE (PostgreSQL + django-tenants)
 DATABASES = {
     "default": {
